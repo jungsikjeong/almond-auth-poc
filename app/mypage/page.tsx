@@ -3,7 +3,11 @@ import { fetchCurrentUser } from '@/lib/api/me';
 
 export default async function MypagePage() {
   // 예시 1
-  const currentUser = await fetchCurrentUser(); // 여기서 발생한 401은 ProtectedRoute가 감지를못하고 보기싫은 브라우저 에러를 띄움
+  /**
+   * // 여기서 발생한 401은 ProtectedRoute가 감지를못하고 보기싫은 브라우저 에러를 띄움
+   * 이유는 nextjs의 의 bottom-top 렌더링으로인해서 감싼곳에서쓰면 401을감지못하기때문임
+   */
+  const currentUser = await fetchCurrentUser();
 
   // 예시 2
   /**
