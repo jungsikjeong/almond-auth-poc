@@ -1,4 +1,4 @@
-/** @format */
+import 'server-only';
 
 import { cookies as nextCookies } from 'next/headers';
 
@@ -23,4 +23,10 @@ export const setTokenCookies = async (
       path: '/',
     });
   }
+};
+
+export const clearTokenCookies = async () => {
+  const cookies = await nextCookies();
+  cookies.delete('accessToken');
+  cookies.delete('refreshToken');
 };

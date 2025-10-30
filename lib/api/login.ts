@@ -1,5 +1,3 @@
-/** @format */
-
 'use server';
 
 import { ApiError } from '@/lib/api-error';
@@ -20,6 +18,8 @@ export async function login(
   const countryCode = formData.get('countryCode') as string;
   const redirectTo = formData.get('redirect_to') as string;
 
+  console.log('redirectTo', redirectTo);
+
   try {
     // 2. 사용자 서비스 로그인
     const result = await serverApi('/auth/signin', {
@@ -34,7 +34,6 @@ export async function login(
     console.error('User service login error:', error);
 
     if (error instanceof ApiError) {
-      // 상태 코드별 에러 메시지
       if (error.status === 400) {
         return {
           success: false,
@@ -93,7 +92,11 @@ export async function login(
 
   // redirectTo가 이미 /로 시작하는 경우 처리
 
-  redirect(`/`);
+  const targetPath = redirectTo?.startsWith('/')
+    ? redirectTo
+    : `/${redirectTo || '/'}`;
+
+  redirect(`/${targetPath}`);
 
   // try {
   //   // 3. Medusa 인증 토큰 생성
