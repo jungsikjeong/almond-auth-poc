@@ -1,5 +1,3 @@
-/** @format */
-
 'use client';
 
 import { login } from '@/lib/api/login';
@@ -12,9 +10,7 @@ export default function LoginForm() {
 
   const handleSubmit = (formData: FormData) => {
     const redirectTo = searchParams.get('redirect_to') || '/';
-
     formData.append('redirect_to', redirectTo);
-
     formAction(formData);
   };
 

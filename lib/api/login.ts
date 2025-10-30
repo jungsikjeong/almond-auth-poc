@@ -3,6 +3,7 @@
 import { ApiError } from '@/lib/api-error';
 import { serverApi } from '@/lib/server-api';
 import { setTokenCookies } from '@/lib/utils/cookies';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 type LoginState =
@@ -17,8 +18,6 @@ export async function login(
   const password = formData.get('password') as string;
   const countryCode = formData.get('countryCode') as string;
   const redirectTo = formData.get('redirect_to') as string;
-
-  console.log('redirectTo', redirectTo);
 
   try {
     // 2. 사용자 서비스 로그인
@@ -84,19 +83,18 @@ export async function login(
     };
   }
 
-  // // redirectTo가 이미 /로 시작하는 경우 처리
-  // const targetPath = redirectTo?.startsWith('/')
-  //   ? redirectTo
-  //   : `/${redirectTo || '/'}`;
-  // redirect(`/${countryCode}${targetPath}`);
-
-  // redirectTo가 이미 /로 시작하는 경우 처리
-
+  // redirectTo 처리: 기본값은 홈
   const targetPath = redirectTo?.startsWith('/')
     ? redirectTo
-    : `/${redirectTo || '/'}`;
+    : redirectTo
+    ? `/${redirectTo}`
+    : '/';
 
-  redirect(`/${targetPath}`);
+  // 캐시 무효화: layout과 해당 페이지가 다시 렌더링되도록
+  revalidatePath('/', 'layout'); // layout부터 무효화
+  revalidatePath(targetPath); // 타겟 페이지도 무효화
+
+  redirect(targetPath);
 
   // try {
   //   // 3. Medusa 인증 토큰 생성

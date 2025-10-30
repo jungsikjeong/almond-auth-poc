@@ -1,5 +1,3 @@
-/** @format */
-
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -10,62 +8,73 @@ const MAX_ATTEMPTS = 2;
 export default function AuthRestore() {
   const router = useRouter();
   const pathname = usePathname();
-  const [attempts, setAttempts] = useState(0);
-  const isRestoring = useRef(false);
+  const attemptsRef = useRef(0);
+  const hasRunRef = useRef(false);
+
+  
 
   useEffect(() => {
-    // 이미 재발급 중이거나 최대 시도 횟수 초과
-    if (isRestoring.current || attempts >= MAX_ATTEMPTS) {
-      if (attempts >= MAX_ATTEMPTS) {
-        handleAuthFail();
-      }
-      return;
-    }
-
-    isRestoring.current = true;
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
 
     const restoreToken = async () => {
+      // 최대 시도 횟수 초과 확인
+      if (attemptsRef.current >= MAX_ATTEMPTS) {
+        console.log('토큰 복구 실패: 최대 시도 횟수 초과');
+        handleAuthFail();
+        return;
+      }
+
       try {
-        const res = await fetch('/auth/restore-token', {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        if (!backendUrl) {
+          throw new Error('NEXT_PUBLIC_BACKEND_URL is not defined');
+        }
+
+        console.log(
+          `토큰 복구 시도 ${attemptsRef.current + 1}/${MAX_ATTEMPTS}`
+        );
+
+        const res = await fetch(`${backendUrl}/auth/restore-token`, {
           method: 'POST',
           signal: AbortSignal.timeout(3000),
+          credentials: 'include',
         });
 
         if (res.ok) {
-          router.refresh();
+          window.location.reload();
         } else {
-          setAttempts((prev) => prev + 1);
+          throw new Error(`HTTP ${res.status}`);
         }
       } catch (error) {
-        console.error('토큰 복구 실패:', error);
-        setAttempts((prev) => prev + 1);
-      } finally {
-        isRestoring.current = false;
+        attemptsRef.current++;
+
+        // 재시도
+        if (attemptsRef.current < MAX_ATTEMPTS) {
+          setTimeout(restoreToken, 1000);
+        } else {
+          handleAuthFail();
+        }
       }
     };
 
-    // 첫 시도는 즉시, 이후는 1초 대기
-    const delay = attempts === 0 ? 0 : 1000;
-    const timer = setTimeout(restoreToken, delay);
-
-    return () => clearTimeout(timer);
-  }, [attempts, router]);
+    restoreToken();
+  }, [pathname, router]);
 
   const handleAuthFail = () => {
-    const isMainPage = pathname === '/';
-
-    if (isMainPage) {
-      router.replace('/auth/login');
-    } else {
-      router.replace(`/auth/login?redirect_to=${encodeURIComponent(pathname)}`);
-    }
+    router.replace(`/auth/login?redirect_to=${encodeURIComponent(pathname)}`);
   };
 
-  // todo: 로딩 변경
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <p className="text-gray-500">인증 상태를 복구 중입니다...</p>
+        <div className="mb-4">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-gray-300 border-r-transparent"></div>
+        </div>
+        <p className="text-gray-700 font-medium">
+          인증 상태를 복구 중입니다...
+        </p>
+        <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
       </div>
     </div>
   );

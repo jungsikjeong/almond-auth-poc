@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/protected-route';
 
 export default function Home() {
   return (
-    <ProtectedRoute>
+    <>
       <div>
         <Header />
         <main className="flex flex-col items-center justify-center h-screen">
@@ -13,6 +13,6 @@ export default function Home() {
           <p>Welcome to the home page</p>
         </main>
       </div>
-    </ProtectedRoute>
+    </>
   );
 }
