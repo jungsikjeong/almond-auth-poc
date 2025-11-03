@@ -10,11 +10,13 @@ export default function Header() {
   return (
     <header className="flex justify-end py-4 px-8">
       <ul className="flex gap-4">
-        <li>
-          <Link href="/mypage">
-            <button>마이페이지</button>
-          </Link>
-        </li>
+        {user && (
+          <li>
+            <Link href="/mypage">
+              <button>마이페이지</button>
+            </Link>
+          </li>
+        )}
 
         <li>
           {user ? (
