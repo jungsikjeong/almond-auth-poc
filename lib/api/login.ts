@@ -2,7 +2,7 @@
 
 import { ApiError } from '@/lib/api-error';
 import { serverApi } from '@/lib/server-api';
-import { setTokenCookies } from '@/lib/utils/cookies';
+import { setTokenCookies } from '@/lib/data/cookies';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
