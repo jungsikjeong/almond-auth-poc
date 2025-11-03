@@ -11,7 +11,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const [state, formAction, isPending] = useActionState(login, null);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = (formData: FormData) => {
     const redirectTo = searchParams.get('redirect_to') || '/';
     formData.append('redirect_to', redirectTo);
     formAction(formData);
@@ -19,12 +19,6 @@ export default function LoginForm() {
 
   return (
     <form action={handleSubmit} className="space-y-4">
-      {state && !state.success && (
-        <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
-          <p className="text-sm text-destructive">{state.error}</p>
-        </div>
-      )}
-
       <div className="space-y-2">
         <Label
           htmlFor="loginId"
